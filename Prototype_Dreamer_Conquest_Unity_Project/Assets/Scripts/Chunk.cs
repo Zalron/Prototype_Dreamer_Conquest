@@ -27,7 +27,7 @@ namespace WorldManager
                 for (int z = 0; z < World.currentWorld.chunkWidth; z++)
                 {
                     map[x, 0, z] = 1;
-                    map[x, 1, z] = Random.Range(0, 1);
+                    map[x, 1, z] = Random.Range(0, 2);
                 }
             }
             CreateVisualMesh(); // calling the createvisualmesh to generate a chunk 
@@ -54,12 +54,30 @@ namespace WorldManager
                             continue; 
                         }
                         int brick = map[x, y, z]; // varible of the bricks in the chunk
-                        BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, tris); // calling the BuildFace methods and passing all the arguments with pre set variables to create the right face
-                        BuildFace(brick, new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, tris); // same as above but reversed and offset by 1 in the x axis to create the left face
-                        BuildFace(brick, new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, tris); // creating the botton faces
-                        BuildFace(brick, new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, tris); // creating the top faces
-                        BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, tris); // creating the forward faces
-                        BuildFace(brick, new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, tris); // creating the backward faces
+                        if (IsTransparent(x - 1, y, z)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, tris); // calling the BuildFace methods and passing all the arguments with pre set variables to create the left face
+                        }
+                        if (IsTransparent(x + 1, y, z)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, tris); // same as above but reversed and offset by 1 in the x axis to create the right face
+                        }
+                        if (IsTransparent(x, y - 1, z)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, tris); // creating the bottom faces
+                        }
+                        if (IsTransparent(x, y + 1, z)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, tris); // creating the top faces
+                        }
+                        if (IsTransparent(x, y, z - 1)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, tris); // creating the back faces
+                        }
+                        if (IsTransparent(x, y, z + 1)) // checking if the face is facing other face 
+                        {
+                            BuildFace(brick, new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, tris); // creating the front faces
+                        }
                     }
                 }
             }
@@ -100,6 +118,27 @@ namespace WorldManager
                 tris.Add(index + 2);
                 tris.Add(index + 0); // two triangles
             }
+        }
+        public virtual bool IsTransparent(int x, int y, int z) // returning a bool to determine which faces on the inside of the mesh shouldn't be generated
+        {
+            int brick = GetInt(x, y, z); 
+            switch(brick) //switch statement for brick to cull faces that don't need to be seen
+            {
+                default:
+                case 0:
+                    return true;
+                case 1:
+                    return false;
+            }
+                
+        }
+        public virtual int GetInt(int x, int y, int z) // gets the int 
+        {
+            if ((x < 0) || (y < 0) || (z < 0) || (y >= World.currentWorld.chunkHeight) || (x >= World.currentWorld.chunkWidth) || (z >= World.currentWorld.chunkWidth)) // if any of this ints are true it will return an error (to be changed)
+            {
+                return 0;
+            }
+            return map[x, y, z]; // returns map
         }
     }
 }
