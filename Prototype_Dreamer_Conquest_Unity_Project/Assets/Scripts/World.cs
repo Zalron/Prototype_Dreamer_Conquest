@@ -7,7 +7,7 @@ namespace WorldManager
     public class World : MonoBehaviour
     {
         public static World currentWorld; // variable of the current world in the games runtime
-        public int chunkWidth = 20, chunkHeight = 20, seed = 0; // ints for chuck width height and seed
+        public int chunkWidth = 10, chunkHeight = 10, seed = 0; // ints for chuck width height and seed
         void Awake() // Use this for initialization
         {
             currentWorld = this;

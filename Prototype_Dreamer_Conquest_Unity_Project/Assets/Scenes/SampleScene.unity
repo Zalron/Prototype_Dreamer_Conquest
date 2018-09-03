@@ -296,8 +296,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkWidth: 20
-  chunkHeight: 20
+  chunkWidth: 10
+  chunkHeight: 10
   seed: 0
 --- !u!1 &1913136172
 GameObject:
@@ -310,6 +310,7 @@ GameObject:
   - component: {fileID: 1913136175}
   - component: {fileID: 1913136174}
   - component: {fileID: 1913136173}
+  - component: {fileID: 1913136177}
   m_Layer: 0
   m_Name: Chunk
   m_TagString: Untagged
@@ -386,3 +387,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1913136177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1913136172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 051d369e4982f4a469727a247ba03028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualMesh: {fileID: 0}

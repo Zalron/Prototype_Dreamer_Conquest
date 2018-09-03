@@ -49,8 +49,17 @@ namespace WorldManager
                 {
                     for (int z = 0; z < World.currentWorld.chunkWidth; z++)
                     {
-                        map[x, 0, z] = 1;
-                        map[x, 1, z] = Random.Range(0, 1);
+                        if (map[x, y, z] == 0)
+                        {
+                            continue; 
+                        }
+                        int brick = map[x, y, z]; // varible of the bricks in the chunk
+                        BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, tris); // calling the BuildFace methods and passing all the arguments with pre set variables to create the right face
+                        BuildFace(brick, new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, tris); // same as above but reversed and offset by 1 in the x axis to create the left face
+                        BuildFace(brick, new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, tris); // creating the botton faces
+                        BuildFace(brick, new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, tris); // creating the top faces
+                        BuildFace(brick, new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, tris); // creating the forward faces
+                        BuildFace(brick, new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, tris); // creating the backward faces
                     }
                 }
             }
@@ -61,6 +70,36 @@ namespace WorldManager
             visualMesh.RecalculateNormals(); // recalculating the normals of the mesh from the tris and verts
             meshFilter.mesh = visualMesh; // setting the meshfilter to the newly calculated visual mesh
             meshCollider.sharedMesh = visualMesh; //setting the meshCollider to the newly calculated visual mesh
+        }
+        public virtual void BuildFace(int brick, Vector3 corner, Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> tris) // created the faces of the mesh
+        {
+            int index = verts.Count; // counting the vert index
+            verts.Add(corner + up); // building the mesh verts in a clockwise order
+            verts.Add(corner + up + right);
+            verts.Add(corner + right);
+            verts.Add(corner);
+            uvs.Add(new Vector2(0, 0)); // building the uvs (will change later)
+            uvs.Add(new Vector2(0, 1));
+            uvs.Add(new Vector2(1, 1));
+            uvs.Add(new Vector2(1, 0));
+            if (reversed) //checking to see of the tris order is reversed 
+            {
+                tris.Add(index + 0); // building the tris of the mesh using the vert index
+                tris.Add(index + 1);
+                tris.Add(index + 2); // one triangle
+                tris.Add(index + 2);
+                tris.Add(index + 3);
+                tris.Add(index + 0); // two triangles
+            }
+            else // reversing the tris order 
+            {
+                tris.Add(index + 1); // building the tris of the mesh using the vert index
+                tris.Add(index + 0);
+                tris.Add(index + 2); // one triangle
+                tris.Add(index + 3);
+                tris.Add(index + 2);
+                tris.Add(index + 0); // two triangles
+            }
         }
     }
 }
