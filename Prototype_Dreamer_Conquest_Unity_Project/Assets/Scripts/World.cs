@@ -6,9 +6,11 @@ namespace WorldManager
 {
     public class World : MonoBehaviour
     {
-        public int chuckWidth = 20, chunkHeight = 20, seed = 0; // ints for chuck width height and seed
-        void Start() // Use this for initialization
+        public static World currentWorld; // variable of the current world in the games runtime
+        public int chunkWidth = 20, chunkHeight = 20, seed = 0; // ints for chuck width height and seed
+        void Awake() // Use this for initialization
         {
+            currentWorld = this;
             if (seed == 0)
             {
                 seed = Random.Range(0, int.MaxValue);
