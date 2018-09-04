@@ -11,6 +11,15 @@ namespace WorldManager
     {
         #region Variables
         public int[,,] map; // 3 dimensional array for the map generation
+        public static List<Chunk> chunks = new List<Chunk>(); // a list of all of the chunks in the game
+        public static int Width // getting a variable from world and storing it in this width variable
+        {
+            get { return World.currentWorld.chunkWidth; }
+        }
+        public static int Height // getting a variable from world and storing it in this height variable
+        {
+            get { return World.currentWorld.chunkHeight; }
+        }
         public Mesh visualMesh; // the visual mesh component
         protected MeshFilter meshFilter; // the mesh filter component
         protected MeshRenderer meshRenderer; // The mesh renderer component
@@ -19,17 +28,18 @@ namespace WorldManager
         #region Start and Update()
         void Start() // Use this for initialization
         {
+            chunks.Add(this); // adding the first chunk generated
             meshFilter = GetComponent<MeshFilter>(); // setting the mesh filter to the component 
             meshRenderer = GetComponent<MeshRenderer>(); // setting the mesh renderer to the component
             meshCollider = GetComponent<MeshCollider>(); // setting the mesh collider to the component
-            map = new int[World.currentWorld.chunkWidth, World.currentWorld.chunkHeight, World.currentWorld.chunkWidth]; // setting the 3 dimensional map array to the map variable in here
-            for (int x = 0; x< World.currentWorld.chunkWidth; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
+            map = new int[Width, Height, Width]; // setting the 3 dimensional map array to the map variable in here
+            for (int x = 0; x< Width; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
                 float noiseX = (float)x / 20;
-                for (int y = 0; y < World.currentWorld.chunkHeight; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     float noiseY = (float)y / 20;
-                    for (int z = 0; z < World.currentWorld.chunkWidth; z++)
+                    for (int z = 0; z < Width; z++)
                     {
                         float noiseZ = (float)z / 20;
                         float noiseValue = Noise.Generate(noiseX, noiseY, noiseZ);
@@ -42,24 +52,25 @@ namespace WorldManager
                     }
                 }
             }
-            CreateVisualMesh(); // calling the createvisualmesh to generate a chunk 
+            StartCoroutine(CreateVisualMesh()); // calling the createvisualmesh to generate a chunk asycrunusly
         }
         void Update() // Update is called once per frame
         {
 
         }
         #endregion
-        public virtual void CreateVisualMesh() //Generating visual mesh
+        #region Chunk mesh creation methods 
+        public virtual IEnumerator CreateVisualMesh() //Generating visual mesh
         {
             visualMesh = new Mesh(); // creating an empty mesh for the visual mesh variable
             List<Vector3> verts = new List<Vector3>(); // list of vertices on the mesh
             List<Vector2> uvs = new List<Vector2>(); // list of uvs on the mesh
             List<int> tris = new List<int>(); // list of triangles on the mesh
-            for (int x = 0; x < World.currentWorld.chunkWidth; x++) // building the world at the start of runtime
+            for (int x = 0; x < Width; x++) // building the world at the start of runtime
             {
-                for (int y = 0; y < World.currentWorld.chunkHeight; y++)
+                for (int y = 0; y < Height; y++)
                 {
-                    for (int z = 0; z < World.currentWorld.chunkWidth; z++)
+                    for (int z = 0; z < Width; z++)
                     {
                         if (map[x, y, z] == 0)
                         {
@@ -100,6 +111,7 @@ namespace WorldManager
             visualMesh.RecalculateNormals(); // recalculating the normals of the mesh from the tris and verts
             meshFilter.mesh = visualMesh; // setting the meshfilter to the newly calculated visual mesh
             meshCollider.sharedMesh = visualMesh; //setting the meshCollider to the newly calculated visual mesh
+            yield return 0;
         }
         public virtual void BuildFace(int brick, Vector3 corner, Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> tris) // created the faces of the mesh
         {
@@ -145,11 +157,25 @@ namespace WorldManager
         }
         public virtual int GetInt(int x, int y, int z) // gets the int 
         {
-            if ((x < 0) || (y < 0) || (z < 0) || (y >= World.currentWorld.chunkHeight) || (x >= World.currentWorld.chunkWidth) || (z >= World.currentWorld.chunkWidth)) // if any of this ints are true it will return an error (to be changed)
+            if ((x < 0) || (y < 0) || (z < 0) || (y >= Height) || (x >= Width) || (z >= Width)) // if any of this ints are true it will return an error (to be changed)
             {
                 return 0;
             }
             return map[x, y, z]; // returns map
+        }
+        #endregion
+        public static Chunk FindChunk (Vector3 pos) // a function for finding a chunk
+        {
+            for (int a = 0; a < chunks.Count; a++)
+            {
+                Vector3 cpos = chunks[a].transform.position; // setting the chunk position as a variable
+                if((pos.x<cpos.x) || (pos.y < cpos.y) || (pos.z < cpos.z) || (pos.x > cpos.x + Width) || (pos.y > cpos.y + Height) || (pos.z > cpos.z + Width))
+                {
+                    continue;
+                }
+                return chunks[a];
+            }
+            return null;
         }
     }
 }
