@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.5748171, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -179,6 +179,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &383243255 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5,
+    type: 2}
+  m_PrefabInternal: {fileID: 971458707}
+  m_Script: {fileID: 11500000, guid: 051d369e4982f4a469727a247ba03028, type: 3}
 --- !u!1 &534669902
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,6 +196,7 @@ GameObject:
   - component: {fileID: 534669904}
   - component: {fileID: 534669903}
   - component: {fileID: 534669906}
+  - component: {fileID: 534669907}
   m_Layer: 0
   m_Name: Player Main Camera
   m_TagString: MainCamera
@@ -270,10 +277,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   panSpeed: 20
   panBorderThickness: 10
-  panLimit: {x: 10, y: 10}
+  panLimit: {x: 100, y: 100}
   scrollSpeed: 20
-  minY: 20
+  minY: 10
   maxY: 120
+--- !u!114 &534669907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 534669902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkWidth: 10
+  chunkHeight: 1000
+  seed: 0
+  viewRange: 30
+  chunkFab: {fileID: 383243255}
 --- !u!1 &649723484
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,7 +305,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 649723485}
-  - component: {fileID: 649723487}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -296,29 +318,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 649723484}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &649723487
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 649723484}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chunkWidth: 10
-  chunkHeight: 10
-  seed: 0
-  viewRange: 30
-  chunkFab: {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5, type: 2}
 --- !u!1001 &971458707
 Prefab:
   m_ObjectHideFlags: 0

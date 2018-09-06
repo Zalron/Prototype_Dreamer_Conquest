@@ -22,21 +22,17 @@ namespace WorldManager
             // checking to generate a new chunk based on the position of the player.
             for (float x = transform.position.x - viewRange; x < transform.position.x + viewRange; x+= chunkWidth)  
             {
-                for (float y = transform.position.y - viewRange; y < transform.position.y + viewRange; y += chunkHeight)
+                for (float z = transform.position.x - viewRange; z < transform.position.z + viewRange; z += chunkWidth)
                 {
-                    for (float z = transform.position.x - viewRange; z < transform.position.z + viewRange; z += chunkWidth)
+                    Vector3 pos = new Vector3(x, 0, z);
+                    pos.x = Mathf.Floor(pos.x / (float)chunkWidth) * chunkWidth;
+                    pos.z = Mathf.Floor(pos.z / (float)chunkWidth) * chunkWidth;
+                    Chunk chunk = Chunk.FindChunk(pos);
+                    if (chunk != null) 
                     {
-                        Vector3 pos = new Vector3(x, y, z);
-                        pos.x = Mathf.Floor(pos.x / (float)chunkWidth) * chunkWidth;
-                        pos.x = Mathf.Floor(pos.y / (float)chunkHeight) * chunkHeight;
-                        pos.x = Mathf.Floor(pos.z / (float)chunkWidth) * chunkWidth;
-                        Chunk chunk = Chunk.FindChunk(pos);
-                        if (chunk != null) 
-                        {
-                            continue;
-                        }
-                        chunk = (Chunk)Instantiate(chunkFab, pos, Quaternion.identity);
+                        continue;
                     }
+                    chunk = (Chunk)Instantiate(chunkFab, pos, Quaternion.identity);
                 }
             }
         }

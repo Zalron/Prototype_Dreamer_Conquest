@@ -33,15 +33,17 @@ namespace WorldManager
             meshRenderer = GetComponent<MeshRenderer>(); // setting the mesh renderer to the component
             meshCollider = GetComponent<MeshCollider>(); // setting the mesh collider to the component
             map = new int[Width, Height, Width]; // setting the 3 dimensional map array to the map variable in here
+            Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
+            Vector3 offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             for (int x = 0; x< Width; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
-                float noiseX = (float)x / 20;
+                float noiseX = Mathf.Abs((float)(x + transform.position.x + offset.x) / 20);
                 for (int y = 0; y < Height; y++)
                 {
-                    float noiseY = (float)y / 20;
+                    float noiseY = Mathf.Abs((float)(y + transform.position.y + offset.y) / 20);
                     for (int z = 0; z < Width; z++)
                     {
-                        float noiseZ = (float)z / 20;
+                        float noiseZ = Mathf.Abs((float)(z + transform.position.z + offset.z) / 20);
                         float noiseValue = Noise.Generate(noiseX, noiseY, noiseZ);
                         noiseValue += (10f - (float)y) / 10;
                         //noiseValue /= (float)y / 5;
@@ -169,7 +171,7 @@ namespace WorldManager
             for (int a = 0; a < chunks.Count; a++)
             {
                 Vector3 cpos = chunks[a].transform.position; // setting the chunk position as a variable
-                if((pos.x<cpos.x) || (pos.y < cpos.y) || (pos.z < cpos.z) || (pos.x > cpos.x + Width) || (pos.y > cpos.y + Height) || (pos.z > cpos.z + Width))
+                if((pos.x < cpos.x) || (pos.z < cpos.z) || (pos.x >= cpos.x + Width) || (pos.z >= cpos.z + Width))
                 {
                     continue;
                 }
