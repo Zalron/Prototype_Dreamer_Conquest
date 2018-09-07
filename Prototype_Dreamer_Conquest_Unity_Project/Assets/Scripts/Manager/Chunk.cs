@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SimplexNoise;
-namespace WorldManager
+namespace DreamerConquest.Manager.World
 {
     [RequireComponent(typeof(MeshFilter))] // automatically adding the MeshFilter component 
     [RequireComponent(typeof(MeshRenderer))] // automatically adding the MeshRenderer component 

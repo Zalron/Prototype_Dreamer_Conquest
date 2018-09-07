@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace WorldManager
+using DreamerConquest.Manager.World;
+namespace DreamerConquest.Manager.World
 {
     public class World : MonoBehaviour
     {
