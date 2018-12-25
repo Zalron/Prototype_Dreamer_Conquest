@@ -4,14 +4,16 @@ using UnityEngine;
 
 namespace DreamerConquest.Manager.Player
 {
-    public class Player : MonoBehaviour
+    public class CameraController : MonoBehaviour
     {
         public float maxInteractDistance = 8;
         public byte selectedInventory = 0;
         public bool resetCamera = false;
         public Vector3 campos;
         public Animator playerAnimator;
-        void Start()  // Use this for initialization
+
+        // Use this for initialization
+        void Start()
         {
             currentPlayerIO = this;
             /*
@@ -19,13 +21,15 @@ namespace DreamerConquest.Manager.Player
             Application.targetFrameRate = 144;
             */
         }
-        void Update() // Update is called once per frame
+
+        // Update is called once per frame
+        void Update()
         {
             //playerAnimator.SetBool("walking", Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D));
-            //if (GameObject.FindWithTag("Player").transform.position.y < -20)
+            //if (GameObject.FindWithTag("FPSController").transform.position.y < -20)
             //{
             //    Debug.Log("Player fell through world, resetting!");
-            //    GameObject.FindWithTag("Player").transform.position = new Vector3(GameObject.FindWithTag("Player").transform.position.x, 60, GameObject.FindWithTag("Player").transform.position.z);
+            //    GameObject.FindWithTag("FPSController").transform.position = new Vector3(GameObject.FindWithTag("FPSController").transform.position.x, 60, GameObject.FindWithTag("FPSController").transform.position.z);
             //}
             if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.C))
             {

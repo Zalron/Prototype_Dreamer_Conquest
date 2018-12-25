@@ -179,12 +179,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &383243255 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5,
+--- !u!1 &223484322 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1785723462194818, guid: e59c03555ee324d25b60d14b9c517dc5,
     type: 2}
   m_PrefabInternal: {fileID: 971458707}
+--- !u!114 &223484323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 223484322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 051d369e4982f4a469727a247ba03028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &534669902
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,9 +207,8 @@ GameObject:
   - component: {fileID: 534669904}
   - component: {fileID: 534669903}
   - component: {fileID: 534669906}
-  - component: {fileID: 534669907}
   m_Layer: 0
-  m_Name: Player Main Camera
+  m_Name: Player
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -275,28 +285,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1195560fe327a7a46a8170544cfb855f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panSpeed: 20
-  panBorderThickness: 10
-  panLimit: {x: 100, y: 100}
-  scrollSpeed: 20
-  minY: 10
-  maxY: 120
---- !u!114 &534669907
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 534669902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chunkWidth: 10
-  chunkHeight: 1000
-  seed: 0
-  viewRange: 30
-  chunkFab: {fileID: 383243255}
 --- !u!1 &649723484
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,6 +294,7 @@ GameObject:
   m_Component:
   - component: {fileID: 649723485}
   - component: {fileID: 649723486}
+  - component: {fileID: 649723487}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -337,6 +326,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af854f1e26989bd40a0abc46fc9f49f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &649723487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 649723484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkWidth: 100
+  chunkHeight: 1000
+  seed: 0
+  viewRange: 50
+  chunkFab: {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5, type: 2}
 --- !u!1001 &971458707
 Prefab:
   m_ObjectHideFlags: 0
@@ -376,6 +381,7 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5, type: 2}
   m_SourcePrefab: {fileID: 100100000, guid: e59c03555ee324d25b60d14b9c517dc5, type: 2}
   m_IsPrefabAsset: 0

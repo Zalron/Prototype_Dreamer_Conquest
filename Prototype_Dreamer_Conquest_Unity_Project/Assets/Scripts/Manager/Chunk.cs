@@ -14,11 +14,17 @@ namespace DreamerConquest.Manager.World
         public static List<Chunk> chunks = new List<Chunk>(); // a list of all of the chunks in the game
         public static int Width // getting a variable from world and storing it in this width variable
         {
-            get { return World.currentWorld.chunkWidth; }
+            get
+            {
+                return World.currentWorld.chunkWidth;
+            }
         }
         public static int Height // getting a variable from world and storing it in this height variable
         {
-            get { return World.currentWorld.chunkHeight; }
+            get
+            {
+                return World.currentWorld.chunkHeight;
+            }
         }
         public Mesh visualMesh; // the visual mesh component
         protected MeshFilter meshFilter; // the mesh filter component
@@ -35,7 +41,7 @@ namespace DreamerConquest.Manager.World
             map = new int[Width, Height, Width]; // setting the 3 dimensional map array to the map variable in here
             Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
             Vector3 offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
-            for (int x = 0; x< Width; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
+            for (int x = 0; x < Width; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
                 float noiseX = Mathf.Abs((float)(x + transform.position.x + offset.x) / 20);
                 for (int y = 0; y < Height; y++)
@@ -76,7 +82,7 @@ namespace DreamerConquest.Manager.World
                     {
                         if (map[x, y, z] == 0)
                         {
-                            continue; 
+                            continue;
                         }
                         int brick = map[x, y, z]; // varible of the bricks in the chunk
                         if (IsTransparent(x - 1, y, z)) // checking if the face is facing other face 
@@ -147,15 +153,15 @@ namespace DreamerConquest.Manager.World
         }
         public virtual bool IsTransparent(int x, int y, int z) // returning a bool to determine which faces on the inside of the mesh shouldn't be generated
         {
-            int brick = GetInt(x, y, z); 
-            switch(brick) //switch statement for brick to cull faces that don't need to be seen
+            int brick = GetInt(x, y, z);
+            switch (brick) //switch statement for brick to cull faces that don't need to be seen
             {
                 default:
                 case 0:
                     return true;
                 case 1:
                     return false;
-            } 
+            }
         }
         public virtual int GetInt(int x, int y, int z) // gets the int 
         {
@@ -166,12 +172,12 @@ namespace DreamerConquest.Manager.World
             return map[x, y, z]; // returns map
         }
         #endregion
-        public static Chunk FindChunk (Vector3 pos) // a function for finding a chunk
+        public static Chunk FindChunk(Vector3 pos) // a function for finding a chunk
         {
             for (int a = 0; a < chunks.Count; a++)
             {
                 Vector3 cpos = chunks[a].transform.position; // setting the chunk position as a variable
-                if((pos.x < cpos.x) || (pos.z < cpos.z) || (pos.x >= cpos.x + Width) || (pos.z >= cpos.z + Width))
+                if ((pos.x < cpos.x) || (pos.z < cpos.z) || (pos.x >= cpos.x + Width) || (pos.z >= cpos.z + Width))
                 {
                     continue;
                 }
