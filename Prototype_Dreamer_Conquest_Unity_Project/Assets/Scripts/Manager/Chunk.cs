@@ -69,6 +69,9 @@ namespace DreamerConquest.Manager.World
             Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain1Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            float heightBase = 10;
+            float maxHeightBase = heightBase - 10;
+            float heightSwing = maxHeightBase - heightBase;
             for (int x = 0; x < Size; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
                 for (int y = 0; y < Size; y++)
@@ -78,15 +81,14 @@ namespace DreamerConquest.Manager.World
                         Vector3 pos = new Vector3(x, y, z);
                         pos += transform.position;
                         float mountainValue = CalculateNoiseValue(pos, grain2Offset, Grain2Scale);
-                        mountainValue /= ((float)y / 5);
-                        float noiseValue = CalculateNoiseValue(pos,grain0Offset, Grain0Scale);
-                        noiseValue /= ((float)y / 5);
-                        noiseValue = Mathf.Max(noiseValue, CalculateNoiseValue(pos, grain1Offset, Grain1Scale));
-                        noiseValue /= ((float)y / 5);
-                        noiseValue = Mathf.Max(noiseValue, CalculateNoiseValue(pos, grain2Offset, Grain2Scale));
-                        if (noiseValue > 0.2f)
+                        mountainValue *= mountainValue;
+                        mountainValue *= heightSwing;
+                        mountainValue += heightBase;
+                        int brick = 1;
+                        
+                        if (mountainValue >= y)
                         {
-                            map[x, y, z] = 1;
+                            map[x, y, z] = brick;
                         }
                     }
                 }
@@ -97,7 +99,7 @@ namespace DreamerConquest.Manager.World
             float noiseX = Mathf.Abs((pos.x + offest.x) * scale);
             float noiseY = Mathf.Abs((pos.y + offest.y) * scale);
             float noiseZ = Mathf.Abs((pos.z + offest.z) * scale);
-            return Noise.Generate(noiseX, noiseY, noiseZ);
+            return Mathf.Max(0,Noise.Generate(noiseX, noiseY, noiseZ));
         }
         #endregion
         #region Chunk mesh creation methods
@@ -163,6 +165,7 @@ namespace DreamerConquest.Manager.World
             verts.Add(corner);
             Vector2 uvWidth = new Vector2(0.25f, 0.25f); // building the uvs
             Vector2 uvCorner = new Vector2(0, 0.75f);
+            uvCorner.x += (float)(brick - 1);
             uvs.Add(uvCorner); 
             uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));
             uvs.Add(new Vector2(uvCorner.x + uvWidth.x, uvCorner.y + uvWidth.y));
@@ -188,6 +191,8 @@ namespace DreamerConquest.Manager.World
         }
         public virtual bool IsTransparent(int x, int y, int z) // returning a bool to determine which faces on the inside of the mesh shouldn't be generated
         {
+            if (y < 0)
+                return false;
             int brick = GetInt(x, y, z);
             switch (brick) //switch statement for brick to cull faces that don't need to be seen
             {

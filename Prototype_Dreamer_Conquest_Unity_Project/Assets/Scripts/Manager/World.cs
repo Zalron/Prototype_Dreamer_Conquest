@@ -28,7 +28,7 @@ namespace DreamerConquest.Manager.World
                 {
                     for (float z = transform.position.x - viewRange; z < transform.position.z + viewRange; z += chunkSize)
                     {
-                        Vector3 pos = new Vector3(x, 0, z);
+                        Vector3 pos = new Vector3(x, y, z);
                         pos.x = Mathf.Floor(pos.x / chunkSize) * chunkSize;
                         pos.y = Mathf.Floor(pos.y / chunkSize) * chunkSize;
                         pos.z = Mathf.Floor(pos.z / chunkSize) * chunkSize;
