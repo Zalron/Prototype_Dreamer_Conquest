@@ -286,10 +286,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 314a501e61ad42249906a675efe8061a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkWidth: 50
-  chunkHeight: 50
+  chunkSize: 50
   seed: 0
   viewRange: 5
+  grain0scale: 0.05
+  grain1scale: 0.03
+  grain2scale: 0.009
+  brickHeight: 1
   chunkFab: {fileID: 114951141418870870, guid: e59c03555ee324d25b60d14b9c517dc5, type: 2}
 --- !u!114 &534669907
 MonoBehaviour:
@@ -302,6 +305,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1ab7e879e683104aba6b0668f4113e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxInteractDistance: 8
+  selectedInventory: 0
+  resetCamera: 0
+  campos: {x: 0, y: 0, z: 0}
+  playerAnimator: {fileID: 0}
+  PlayerObject: {fileID: 534669902}
 --- !u!1001 &971458707
 Prefab:
   m_ObjectHideFlags: 0

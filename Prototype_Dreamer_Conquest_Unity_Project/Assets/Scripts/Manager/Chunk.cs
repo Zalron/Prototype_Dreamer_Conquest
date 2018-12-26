@@ -19,6 +19,13 @@ namespace DreamerConquest.Manager.World
                 return World.currentWorld.chunkSize;
             }
         }
+        public static float BrickHeight
+        {
+            get
+            {
+                return World.currentWorld.brickHeight;
+            }
+        }
         public static float Grain0Scale
         {
             get
@@ -63,18 +70,18 @@ namespace DreamerConquest.Manager.World
         #region Creates the map
         public void CalculateMap() // Calculates the map at the start of the game session
         {
-            map = new int[Size, Size, Size]; // setting the 3 dimensional map array to the map variable in here
             Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
             Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain1Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            map = new int[Size, Size, Size]; // setting the 3 dimensional map array to the map variable in here
             for (int x = 0; x < Size; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
                 for (int y = 0; y < Size; y++)
                 {
                     for (int z = 0; z < Size; z++)
                     {
-                        map[x, y, z] = GetTheoreticalIntNoise(new Vector3(x, y, z) + transform.position);
+                        map[x, y, z] = GetTheoreticalInt(new Vector3(x, y, z) + transform.position, grain0Offset, grain1Offset, grain2Offset);
                     }
                 }
             }
@@ -94,11 +101,15 @@ namespace DreamerConquest.Manager.World
             float heightBase = 10;
             float maxHeight = heightBase - 10;
             float heightSwing = maxHeight - heightBase;
-            float mountainValue = CalculateNoiseValue(pos, offset0, Grain2Scale);
+            float mountainValue = CalculateNoiseValue(pos, offset1, 0.009f);
+            if (mountainValue == 0)
+            {
+                brick = 3;
+            }
             mountainValue = Mathf.Sqrt(mountainValue);
             mountainValue *= heightSwing;
             mountainValue += heightBase;
-            mountainValue += (CalculateNoiseValue(pos, offset1, Grain0Scale) * 10) - 5f;
+            mountainValue += (CalculateNoiseValue(pos, offset0, 0.05f) * 10) - 5f;
 
             if (mountainValue >= pos.y)
             {
@@ -106,7 +117,7 @@ namespace DreamerConquest.Manager.World
             }
             return 0;
         }
-        public static int GetTheoreticalIntNoise(Vector3 pos)
+        public static int GetTheoreticalInt(Vector3 pos)
         {
             Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
             Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
@@ -114,7 +125,7 @@ namespace DreamerConquest.Manager.World
             Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             return GetTheoreticalInt(pos, grain0Offset, grain1Offset, grain2Offset);
         }
-        public virtual IEnumerator CreateVisualMesh() //Generating visual mesh
+        public virtual IEnumerator CreateVisualMesh(bool isChunkload = true) //Generating visual mesh
         {
             visualMesh = new Mesh(); // creating an empty mesh for the visual mesh variable
             List<Vector3> verts = new List<Vector3>(); // list of vertices on the mesh
@@ -156,6 +167,10 @@ namespace DreamerConquest.Manager.World
                             BuildFace(brick, new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, tris); // creating the front faces
                         }
                     }
+                }
+                if (isChunkload && Time.time > Time.deltaTime)
+                {
+                    yield return new WaitForEndOfFrame();
                 }
             }
             visualMesh.vertices = verts.ToArray(); //setting the visualmesh vertices to the verts list
@@ -202,37 +217,35 @@ namespace DreamerConquest.Manager.World
         }
         public virtual bool IsTransparent(int x, int y, int z) // returning a bool to determine which faces on the inside of the mesh shouldn't be generated
         {
-            if (y < 0)
-                return false;
             int brick = GetInt(x, y, z);
             switch (brick) //switch statement for brick to cull faces that don't need to be seen
             {
-                default:
                 case 0:
                     return true;
-                case 1:
+                default:
                     return false;
             }
         }
-        public virtual int GetInt(int x, int y, int z) // gets the int 
+        public virtual int GetInt(int x, int y, int z)
         {
-            if ((x < 0) || (y < 0) || (z < 0) || (y >= Size) || (x >= Size) || (z >= Size)) // if any of this ints are true it will return an error (to be changed)
+            if ((y < 0) || (y >= Size))
+                return 0;
+            if ((x < 0) || (z < 0) || (x >= Size) || (z >= Size))
             {
                 Vector3 worldPos = new Vector3(x, y, z) + transform.position;
                 Chunk chunk = Chunk.FindChunk(worldPos);
                 if (chunk == this)
-                {
                     return 0;
-                }
-                if (chunk == null) //draws nothing if cannot find neighbouring chunk
+                if (chunk == null)
                 {
-                    return GetTheoreticalIntNoise(worldPos);
+                    return GetTheoreticalInt(worldPos);
                 }
-                return chunk.TranslateGlobalIntoLocal(worldPos);
+                return chunk.GetInt(worldPos);
             }
-            return map[x, y, z]; // returns map
+            return map[x, y, z];
         }
-        public virtual int TranslateGlobalIntoLocal(Vector3 worldPos)
+
+        public virtual int GetInt(Vector3 worldPos)
         {
             worldPos -= transform.position;
             int x = Mathf.FloorToInt(worldPos.x);
@@ -241,6 +254,72 @@ namespace DreamerConquest.Manager.World
             return GetInt(x, y, z);
         }
         #endregion
+        public bool SetBrick(int brick, Vector3 worldPos)
+        {
+            worldPos -= transform.position;
+            return SetBrick(brick, Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), Mathf.FloorToInt(worldPos.z));
+        }
+
+        public bool SetBrick(int brick, int x, int y, int z)
+        {
+            if ((x < 0) || (y < 0) || (z < 0) || (x >= Size) || (y >= Size || (z >= Size)))
+            {
+                return false;
+            }
+            if (map[x, y, z] == brick)
+                return false;
+            map[x, y, z] = brick;
+            StartCoroutine(CreateVisualMesh(false));
+            if (x == 0)
+            {
+                Chunk chunk = FindChunk(new Vector3(x - 2, y, z) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            if (x == Size - 1)
+            {
+                Chunk chunk = FindChunk(new Vector3(x + 2, y, z) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            if (y == Size)
+            {
+                Chunk chunk = FindChunk(new Vector3(x, y + 2, z) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            if (y == Size - 1)
+            {
+                Chunk chunk = FindChunk(new Vector3(x, y + 2, z) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            if (z == 0)
+            {
+                Chunk chunk = FindChunk(new Vector3(x, y, z - 2) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            if (z == Size - 1)
+            {
+                Chunk chunk = FindChunk(new Vector3(x, y, z + 2) + transform.position);
+                if (chunk != null)
+                {
+                    StartCoroutine(chunk.CreateVisualMesh(false));
+                }
+            }
+            return true;
+        }
         public static Chunk FindChunk(Vector3 pos) // a function for finding a chunk
         {
             for (int a = 0; a < chunks.Count; a++)
