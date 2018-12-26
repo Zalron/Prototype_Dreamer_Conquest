@@ -61,7 +61,6 @@ namespace DreamerConquest.Manager.World
         }
         #endregion
         #region Creates the map
-
         public void CalculateMap() // Calculates the map at the start of the game session
         {
             map = new int[Size, Size, Size]; // setting the 3 dimensional map array to the map variable in here
@@ -69,32 +68,18 @@ namespace DreamerConquest.Manager.World
             Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain1Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
             Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
-            float heightBase = 10;
-            float maxHeightBase = heightBase - 10;
-            float heightSwing = maxHeightBase - heightBase;
             for (int x = 0; x < Size; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
             {
                 for (int y = 0; y < Size; y++)
                 {
                     for (int z = 0; z < Size; z++)
                     {
-                        Vector3 pos = new Vector3(x, y, z);
-                        pos += transform.position;
-                        float mountainValue = CalculateNoiseValue(pos, grain2Offset, Grain2Scale);
-                        mountainValue *= mountainValue;
-                        mountainValue *= heightSwing;
-                        mountainValue += heightBase;
-                        int brick = 1;
-                        
-                        if (mountainValue >= y)
-                        {
-                            map[x, y, z] = brick;
-                        }
+                        map[x, y, z] = GetTheoreticalIntNoise(new Vector3(x, y, z) + transform.position);
                     }
                 }
             }
         }
-        public virtual float CalculateNoiseValue(Vector3 pos, Vector3 offest, float scale) //Calculates the noise value used by the CalculateMap function
+        public static float CalculateNoiseValue(Vector3 pos, Vector3 offest, float scale) //Calculates the noise value used by the CalculateMap function
         {
             float noiseX = Mathf.Abs((pos.x + offest.x) * scale);
             float noiseY = Mathf.Abs((pos.y + offest.y) * scale);
@@ -103,6 +88,32 @@ namespace DreamerConquest.Manager.World
         }
         #endregion
         #region Chunk mesh creation methods
+        public static int GetTheoreticalInt(Vector3 pos, Vector3 offset0, Vector3 offset1, Vector3 offset2)
+        {
+            int brick = 1;
+            float heightBase = 10;
+            float maxHeight = heightBase - 10;
+            float heightSwing = maxHeight - heightBase;
+            float mountainValue = CalculateNoiseValue(pos, offset0, Grain2Scale);
+            mountainValue = Mathf.Sqrt(mountainValue);
+            mountainValue *= heightSwing;
+            mountainValue += heightBase;
+            mountainValue += (CalculateNoiseValue(pos, offset1, Grain0Scale) * 10) - 5f;
+
+            if (mountainValue >= pos.y)
+            {
+                return brick;
+            }
+            return 0;
+        }
+        public static int GetTheoreticalIntNoise(Vector3 pos)
+        {
+            Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
+            Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            Vector3 grain1Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            return GetTheoreticalInt(pos, grain0Offset, grain1Offset, grain2Offset);
+        }
         public virtual IEnumerator CreateVisualMesh() //Generating visual mesh
         {
             visualMesh = new Mesh(); // creating an empty mesh for the visual mesh variable
@@ -207,9 +218,27 @@ namespace DreamerConquest.Manager.World
         {
             if ((x < 0) || (y < 0) || (z < 0) || (y >= Size) || (x >= Size) || (z >= Size)) // if any of this ints are true it will return an error (to be changed)
             {
-                return 0;
+                Vector3 worldPos = new Vector3(x, y, z) + transform.position;
+                Chunk chunk = Chunk.FindChunk(worldPos);
+                if (chunk == this)
+                {
+                    return 0;
+                }
+                if (chunk == null) //draws nothing if cannot find neighbouring chunk
+                {
+                    return GetTheoreticalIntNoise(worldPos);
+                }
+                return chunk.TranslateGlobalIntoLocal(worldPos);
             }
             return map[x, y, z]; // returns map
+        }
+        public virtual int TranslateGlobalIntoLocal(Vector3 worldPos)
+        {
+            worldPos -= transform.position;
+            int x = Mathf.FloorToInt(worldPos.x);
+            int y = Mathf.FloorToInt(worldPos.y);
+            int z = Mathf.FloorToInt(worldPos.z);
+            return GetInt(x, y, z);
         }
         #endregion
         public static Chunk FindChunk(Vector3 pos) // a function for finding a chunk
