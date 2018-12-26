@@ -12,18 +12,32 @@ namespace DreamerConquest.Manager.World
         #region Variables
         public int[,,] map; // 3 dimensional array for the map generation
         public static List<Chunk> chunks = new List<Chunk>(); // a list of all of the chunks in the game
-        public static int Width // getting a variable from world and storing it in this width variable
+        public static int Size // getting a variable from world and storing it in this width variable
         {
             get
             {
-                return World.currentWorld.chunkWidth;
+                return World.currentWorld.chunkSize;
             }
         }
-        public static int Height // getting a variable from world and storing it in this height variable
+        public static float Grain0Scale
         {
             get
             {
-                return World.currentWorld.chunkHeight;
+                return World.currentWorld.grain0scale;
+            }
+        }
+        public static float Grain1Scale
+        {
+            get
+            {
+                return World.currentWorld.grain1scale;
+            }
+        }
+        public static float Grain2Scale
+        {
+            get
+            {
+                return World.currentWorld.grain2scale;
             }
         }
         public Mesh visualMesh; // the visual mesh component
@@ -38,28 +52,7 @@ namespace DreamerConquest.Manager.World
             meshFilter = GetComponent<MeshFilter>(); // setting the mesh filter to the component 
             meshRenderer = GetComponent<MeshRenderer>(); // setting the mesh renderer to the component
             meshCollider = GetComponent<MeshCollider>(); // setting the mesh collider to the component
-            map = new int[Width, Height, Width]; // setting the 3 dimensional map array to the map variable in here
-            Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
-            Vector3 offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
-            for (int x = 0; x < Width; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
-            {
-                float noiseX = Mathf.Abs((float)(x + transform.position.x + offset.x) / 20);
-                for (int y = 0; y < Height; y++)
-                {
-                    float noiseY = Mathf.Abs((float)(y + transform.position.y + offset.y) / 20);
-                    for (int z = 0; z < Width; z++)
-                    {
-                        float noiseZ = Mathf.Abs((float)(z + transform.position.z + offset.z) / 20);
-                        float noiseValue = Noise.Generate(noiseX, noiseY, noiseZ);
-                        noiseValue += (10f - (float)y) / 10;
-                        //noiseValue /= (float)y / 5;
-                        if (noiseValue > 0.2f)
-                        {
-                            map[x, y, z] = 1;
-                        }
-                    }
-                }
-            }
+            CalculateMap();
             StartCoroutine(CreateVisualMesh()); // calling the createvisualmesh to generate a chunk asycrunusly
         }
         void Update() // Update is called once per frame
@@ -67,18 +60,58 @@ namespace DreamerConquest.Manager.World
 
         }
         #endregion
-        #region Chunk mesh creation methods 
+        #region Creates the map
+
+        public void CalculateMap() // Calculates the map at the start of the game session
+        {
+            map = new int[Size, Size, Size]; // setting the 3 dimensional map array to the map variable in here
+            Random.seed = World.currentWorld.seed; // setting the map generation to the world seed
+            Vector3 grain0Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            Vector3 grain1Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            Vector3 grain2Offset = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+            for (int x = 0; x < Size; x++) // building the world at the start of runtime and using SimplexNoise to generate the noise for random terrian
+            {
+                for (int y = 0; y < Size; y++)
+                {
+                    for (int z = 0; z < Size; z++)
+                    {
+                        Vector3 pos = new Vector3(x, y, z);
+                        pos += transform.position;
+                        float mountainValue = CalculateNoiseValue(pos, grain2Offset, Grain2Scale);
+                        mountainValue /= ((float)y / 5);
+                        float noiseValue = CalculateNoiseValue(pos,grain0Offset, Grain0Scale);
+                        noiseValue /= ((float)y / 5);
+                        noiseValue = Mathf.Max(noiseValue, CalculateNoiseValue(pos, grain1Offset, Grain1Scale));
+                        noiseValue /= ((float)y / 5);
+                        noiseValue = Mathf.Max(noiseValue, CalculateNoiseValue(pos, grain2Offset, Grain2Scale));
+                        if (noiseValue > 0.2f)
+                        {
+                            map[x, y, z] = 1;
+                        }
+                    }
+                }
+            }
+        }
+        public virtual float CalculateNoiseValue(Vector3 pos, Vector3 offest, float scale) //Calculates the noise value used by the CalculateMap function
+        {
+            float noiseX = Mathf.Abs((pos.x + offest.x) * scale);
+            float noiseY = Mathf.Abs((pos.y + offest.y) * scale);
+            float noiseZ = Mathf.Abs((pos.z + offest.z) * scale);
+            return Noise.Generate(noiseX, noiseY, noiseZ);
+        }
+        #endregion
+        #region Chunk mesh creation methods
         public virtual IEnumerator CreateVisualMesh() //Generating visual mesh
         {
             visualMesh = new Mesh(); // creating an empty mesh for the visual mesh variable
             List<Vector3> verts = new List<Vector3>(); // list of vertices on the mesh
             List<Vector2> uvs = new List<Vector2>(); // list of uvs on the mesh
             List<int> tris = new List<int>(); // list of triangles on the mesh
-            for (int x = 0; x < Width; x++) // building the world at the start of runtime
+            for (int x = 0; x < Size; x++) // building the world at the start of runtime
             {
-                for (int y = 0; y < Height; y++)
+                for (int y = 0; y < Size; y++)
                 {
-                    for (int z = 0; z < Width; z++)
+                    for (int z = 0; z < Size; z++)
                     {
                         if (map[x, y, z] == 0)
                         {
@@ -128,10 +161,12 @@ namespace DreamerConquest.Manager.World
             verts.Add(corner + up + right);
             verts.Add(corner + right);
             verts.Add(corner);
-            uvs.Add(new Vector2(0, 0)); // building the uvs (will change later)
-            uvs.Add(new Vector2(0, 1));
-            uvs.Add(new Vector2(1, 1));
-            uvs.Add(new Vector2(1, 0));
+            Vector2 uvWidth = new Vector2(0.25f, 0.25f); // building the uvs
+            Vector2 uvCorner = new Vector2(0, 0.75f);
+            uvs.Add(uvCorner); 
+            uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));
+            uvs.Add(new Vector2(uvCorner.x + uvWidth.x, uvCorner.y + uvWidth.y));
+            uvs.Add(new Vector2(uvCorner.x + uvWidth.x, uvCorner.y));
             if (reversed) //checking to see of the tris order is reversed 
             {
                 tris.Add(index + 0); // building the tris of the mesh using the vert index
@@ -165,7 +200,7 @@ namespace DreamerConquest.Manager.World
         }
         public virtual int GetInt(int x, int y, int z) // gets the int 
         {
-            if ((x < 0) || (y < 0) || (z < 0) || (y >= Height) || (x >= Width) || (z >= Width)) // if any of this ints are true it will return an error (to be changed)
+            if ((x < 0) || (y < 0) || (z < 0) || (y >= Size) || (x >= Size) || (z >= Size)) // if any of this ints are true it will return an error (to be changed)
             {
                 return 0;
             }
@@ -177,7 +212,7 @@ namespace DreamerConquest.Manager.World
             for (int a = 0; a < chunks.Count; a++)
             {
                 Vector3 cpos = chunks[a].transform.position; // setting the chunk position as a variable
-                if ((pos.x < cpos.x) || (pos.z < cpos.z) || (pos.x >= cpos.x + Width) || (pos.z >= cpos.z + Width))
+                if ((pos.x < cpos.x) || (pos.z < cpos.z) || (pos.y < cpos.y) || (pos.x >= cpos.x + Size) || (pos.z >= cpos.z + Size) || (pos.y >= cpos.y + Size))
                 {
                     continue;
                 }

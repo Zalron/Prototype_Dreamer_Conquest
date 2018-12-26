@@ -7,8 +7,9 @@ namespace DreamerConquest.Manager.World
     public class World : MonoBehaviour
     {
         public static World currentWorld; // variable of the current world in the games runtime
-        public int chunkWidth = 100, chunkHeight = 1000, seed = 0; // ints for chuck width height and seed
+        public int chunkSize = 50, seed = 0; // ints for chuck width height and seed
         public float viewRange; // range for chunk to be generated
+        public float grain0scale = 0.05f, grain1scale = 0.03f, grain2scale = 0.009f;
         public Chunk chunkFab;
         void Awake() // Use this for initialization
         {
@@ -21,19 +22,23 @@ namespace DreamerConquest.Manager.World
         void Update() // Update is called once per frame
         {
             // checking to generate a new chunk based on the position of the player.
-            for (float x = transform.position.x - viewRange; x < transform.position.x + viewRange; x += chunkWidth)
+            for (float x = transform.position.x - viewRange; x < transform.position.x + viewRange; x += chunkSize)
             {
-                for (float z = transform.position.x - viewRange; z < transform.position.z + viewRange; z += chunkWidth)
+                for (float y = transform.position.y - viewRange; y < transform.position.y + viewRange; y += chunkSize)
                 {
-                    Vector3 pos = new Vector3(x, 0, z);
-                    pos.x = Mathf.Floor(pos.x / (float)chunkWidth) * chunkWidth;
-                    pos.z = Mathf.Floor(pos.z / (float)chunkWidth) * chunkWidth;
-                    Chunk chunk = Chunk.FindChunk(pos);
-                    if (chunk != null)
+                    for (float z = transform.position.x - viewRange; z < transform.position.z + viewRange; z += chunkSize)
                     {
-                        continue;
+                        Vector3 pos = new Vector3(x, 0, z);
+                        pos.x = Mathf.Floor(pos.x / chunkSize) * chunkSize;
+                        pos.y = Mathf.Floor(pos.y / chunkSize) * chunkSize;
+                        pos.z = Mathf.Floor(pos.z / chunkSize) * chunkSize;
+                        Chunk chunk = Chunk.FindChunk(pos);
+                        if (chunk != null)
+                        {
+                            continue;
+                        }
+                        chunk = (Chunk)Instantiate(chunkFab, pos, Quaternion.identity);
                     }
-                    chunk = (Chunk)Instantiate(chunkFab, pos, Quaternion.identity);
                 }
             }
         }
